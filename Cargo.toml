@@ -6,4 +6,4 @@ edition = "2018"
 build = "build.rs"
 
 [dependencies]
-sdl2 = "0.34.0"
+sdl2 = { version = "0.34.0" }

@@ -1,17 +1,13 @@
 extern crate sdl2;
-mod map;
 mod core;
-mod entities;
+mod game;
+mod renderer;
 
-use std::time::Duration;
-use sdl2::pixels::Color;
+use std::time::{Instant};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::render::{WindowCanvas};
-use sdl2::rect::Rect;
-use crate::map::{Map, CellType};
-use crate::core::Vector;
-use crate::entities::Player;
+
+use crate::game::{GameState, ActiveInputs};
 
 static SCREEN_WIDTH: u32 = 800;
 static SCREEN_HEIGHT: u32 = 600;
@@ -26,63 +22,46 @@ pub fn main() {
         .unwrap();
 
     let mut canvas = window.into_canvas().build().unwrap();
-
-    let map = Map::new();
-
-    // Start the player in the middle of the 2nd diagonal cell
-    let pos_value = map.units_per_cell as f32 * 1.5_f32;
-    let initial_pos = Vector {x: pos_value, y: pos_value};
-    let player = Player::new(initial_pos);
+    let mut game_state = GameState::new();
+    let mut frame_count = 0_u32;
+    let mut last_frame_at = Instant::now();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut frame_count = 0_u32;
     'main_loop: loop {
+        let frame_start = Instant::now();
+        let time_since_last_frame = frame_start - last_frame_at;
+
+        let mut inputs = ActiveInputs::new();
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit {..} |
-                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    break 'main_loop
+                Event::Quit {..} => break 'main_loop,
+                Event::KeyDown { keycode: Some(key), .. } => {
+                    apply_key_to_inputs(&mut inputs, key);
                 },
                 _ => {}
             }
         }
 
-        render(&mut canvas, &map, &player);
+        if inputs.exit_game {
+            break;
+        }
 
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        game_state.tick(&time_since_last_frame, inputs);
+
+        renderer::render(&mut canvas, &game_state);
+
         frame_count = frame_count.wrapping_add(1_u32);
+        last_frame_at = frame_start;
     }
 }
 
-fn render(canvas: &mut WindowCanvas, map: &Map, player: &Player) {
-    canvas.set_draw_color(Color::BLACK);
-    canvas.clear();
-
-    for row in 0..map.height as i32 {
-        for col in 0..map.width as i32 {
-            let x1 = col * map.units_per_cell as i32;
-            let y1 = row * map.units_per_cell as i32;
-
-            let rect = Rect::new(x1, y1, map.units_per_cell, map.units_per_cell);
-            let cell = map.cell_at(row as usize, col as usize);
-
-            match &*cell {
-                CellType::Wall => canvas.set_draw_color(Color::RED),
-                CellType::Empty => canvas.set_draw_color(Color::WHITE)
-            }
-
-            canvas.fill_rect(rect).unwrap();
-        }
+fn apply_key_to_inputs(inputs: &mut ActiveInputs, key: Keycode) {
+    match key {
+        Keycode::Escape => inputs.exit_game = true,
+        Keycode::W => inputs.move_forward = true,
+        Keycode::S => inputs.move_back = true,
+        Keycode::A => inputs.turn_left = true,
+        Keycode::D => inputs.turn_right = true,
+        _ => (),
     }
-
-    {
-        let x1 = player.position.x as i32 - (player.collision_size as i32 / 2);
-        let y1 = player.position.x as i32 - (player.collision_size as i32 / 2);
-        let rect = Rect::new(x1, y1, player.collision_size as u32, player.collision_size as u32);
-
-        canvas.set_draw_color(Color::GREEN);
-        canvas.fill_rect(rect).unwrap();
-    }
-
-    canvas.present();
 }
