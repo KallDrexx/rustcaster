@@ -1,0 +1,9 @@
+[package]
+name = "rustcaster"
+version = "0.1.0"
+authors = ["KallDrexx <me@mshapiro.net>"]
+edition = "2018"
+build = "build.rs"
+
+[dependencies]
+sdl2 = "0.34.0"
