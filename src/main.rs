@@ -36,8 +36,12 @@ pub fn main() {
             match event {
                 Event::Quit {..} => break 'main_loop,
                 Event::KeyDown { keycode: Some(key), .. } => {
-                    apply_key_to_inputs(&mut inputs, key);
+                    apply_key_down_to_inputs(&mut inputs, key);
                 },
+
+                Event::KeyUp { keycode: Some(key), .. } => {
+                    apply_key_up_to_inputs(&mut inputs, key);
+                }
                 _ => {}
             }
         }
@@ -55,13 +59,21 @@ pub fn main() {
     }
 }
 
-fn apply_key_to_inputs(inputs: &mut ActiveInputs, key: Keycode) {
+fn apply_key_down_to_inputs(inputs: &mut ActiveInputs, key: Keycode) {
     match key {
         Keycode::Escape => inputs.exit_game = true,
         Keycode::W => inputs.move_forward = true,
         Keycode::S => inputs.move_back = true,
         Keycode::A => inputs.turn_left = true,
         Keycode::D => inputs.turn_right = true,
+        _ => (),
+    }
+}
+
+fn apply_key_up_to_inputs(inputs: &mut ActiveInputs, key: Keycode) {
+    match key {
+        Keycode::KpPlus => inputs.zoom_in = true,
+        Keycode::KpMinus => inputs.zoom_out = true,
         _ => (),
     }
 }

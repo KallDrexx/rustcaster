@@ -14,12 +14,16 @@ pub fn render(canvas: &mut WindowCanvas, game_state: &GameState) {
 }
 
 fn render_overhead_map(canvas: &mut WindowCanvas, game_state: &GameState) {
+    let zoom = game_state.map_zoom_level;
+
     for row in 0..game_state.map.height as i32 {
         for col in 0..game_state.map.width as i32 {
-            let x1 = col * game_state.map.units_per_cell as i32;
-            let y1 = row * game_state.map.units_per_cell as i32;
+            let x1 = col * game_state.map.units_per_cell as i32 * zoom as i32;
+            let y1 = row * game_state.map.units_per_cell as i32 * zoom as i32;
+            let width = game_state.map.units_per_cell * zoom as u32;
+            let height = game_state.map.units_per_cell * zoom as u32;
 
-            let rect = Rect::new(x1, y1, game_state.map.units_per_cell, game_state.map.units_per_cell);
+            let rect = Rect::new(x1, y1, width, height);
             let cell = game_state.map.cell_at(row as usize, col as usize);
 
             match &*cell {
@@ -32,9 +36,15 @@ fn render_overhead_map(canvas: &mut WindowCanvas, game_state: &GameState) {
     }
 
     {
-        let x1 = game_state.player.position.x as i32 - (game_state.player.collision_size as i32 / 2);
-        let y1 = game_state.player.position.x as i32 - (game_state.player.collision_size as i32 / 2);
-        let rect = Rect::new(x1, y1, game_state.player.collision_size as u32, game_state.player.collision_size as u32);
+        // Adjust the player's position based on the scale of the map
+        let player_size = game_state.player.collision_size * zoom as u16;
+        let pos_x = game_state.player.position.x as i32 * zoom as i32;
+        let pos_y = game_state.player.position.y as i32 * zoom as i32;
+
+        let x1 = pos_x - (player_size / 2) as i32;
+        let y1 = pos_y - (player_size / 2) as i32;
+
+        let rect = Rect::new(x1, y1, player_size as u32, player_size as u32);
 
         canvas.set_draw_color(Color::GREEN);
         canvas.fill_rect(rect).unwrap();
