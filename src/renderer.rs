@@ -1,6 +1,6 @@
 use sdl2::render::WindowCanvas;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
+use sdl2::rect::{Rect, Point};
 use crate::game::map::CellType;
 use crate::game::GameState;
 
@@ -48,5 +48,13 @@ fn render_overhead_map(canvas: &mut WindowCanvas, game_state: &GameState) {
 
         canvas.set_draw_color(Color::GREEN);
         canvas.fill_rect(rect).unwrap();
+
+        // Show the direction the player is facing
+        const LINE_LENGTH: u32 = 20;
+        let line_end_x = (game_state.player.facing.0.cos() * LINE_LENGTH as f32) as i32 + pos_x;
+        let line_end_y = (game_state.player.facing.0.sin() * LINE_LENGTH as f32) as i32 + pos_y;
+
+        canvas.set_draw_color(Color::BLACK);
+        canvas.draw_line(Point::new(pos_x, pos_y), Point::new(line_end_x, line_end_y)).unwrap();
     }
 }

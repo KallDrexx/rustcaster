@@ -1,11 +1,12 @@
-use crate::core::{Vector, Radians};
+use crate::core::radians::Radians;
+use crate::core::vector::Vector;
 
 pub struct Player {
     pub position: Vector,
     pub facing: Radians,
     pub collision_size: u16,
     pub velocity: Vector,
-    _private: (), // prevent construction
+    pub turn_speed: f32,
 }
 
 impl Player {
@@ -15,7 +16,7 @@ impl Player {
             facing: Radians(0_f32),
             collision_size: 10,
             velocity: Vector {x: 0f32, y: 0f32},
-            _private: (),
+            turn_speed: 5_f32,
         }
     }
 }

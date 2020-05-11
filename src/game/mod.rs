@@ -1,7 +1,7 @@
 use crate::game::map::{Map, SpawnType};
 use crate::game::entities::Player;
-use crate::core::Vector;
 use std::time::Duration;
+use crate::core::vector::Vector;
 
 pub mod entities;
 pub mod map;
@@ -49,13 +49,22 @@ impl GameState {
         }
     }
 
-    pub fn tick(&mut self, _time_since_last_frame: &Duration, inputs: ActiveInputs) {
+    pub fn tick(&mut self, time_since_last_frame: &Duration, inputs: ActiveInputs) {
         if inputs.zoom_in {
             self.map_zoom_level += 1;
         }
 
         if inputs.zoom_out && self.map_zoom_level > 1 {
             self.map_zoom_level -= 1;
+        }
+
+        let turn_amount = self.player.turn_speed * time_since_last_frame.as_secs_f32();
+        if inputs.turn_left {
+            self.player.facing = &self.player.facing - turn_amount;
+        }
+
+        if inputs.turn_right {
+            self.player.facing = &self.player.facing + turn_amount;
         }
     }
 }
