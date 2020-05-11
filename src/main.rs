@@ -5,7 +5,7 @@ mod renderer;
 
 use std::time::{Instant};
 use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use sdl2::keyboard::{Keycode, KeyboardState, Scancode};
 
 use crate::game::{GameState, ActiveInputs};
 
@@ -25,32 +25,34 @@ pub fn main() {
     let mut game_state = GameState::new();
     let mut frame_count = 0_u32;
     let mut last_frame_at = Instant::now();
+    let mut inputs = ActiveInputs::new();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'main_loop: loop {
         let frame_start = Instant::now();
         let time_since_last_frame = frame_start - last_frame_at;
 
-        let mut inputs = ActiveInputs::new();
+        inputs.zoom_out = false;
+        inputs.zoom_in = false;
+
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} => break 'main_loop,
-                Event::KeyDown { keycode: Some(key), .. } => {
-                    apply_key_down_to_inputs(&mut inputs, key);
-                },
-
                 Event::KeyUp { keycode: Some(key), .. } => {
+
                     apply_key_up_to_inputs(&mut inputs, key);
                 }
                 _ => {}
             }
         }
 
+        process_inputs(&mut inputs, &event_pump.keyboard_state());
+
         if inputs.exit_game {
             break;
         }
 
-        game_state.tick(&time_since_last_frame, inputs);
+        game_state.tick(&time_since_last_frame, &inputs);
 
         renderer::render(&mut canvas, &game_state);
 
@@ -59,15 +61,13 @@ pub fn main() {
     }
 }
 
-fn apply_key_down_to_inputs(inputs: &mut ActiveInputs, key: Keycode) {
-    match key {
-        Keycode::Escape => inputs.exit_game = true,
-        Keycode::W => inputs.move_forward = true,
-        Keycode::S => inputs.move_back = true,
-        Keycode::A => inputs.turn_left = true,
-        Keycode::D => inputs.turn_right = true,
-        _ => (),
-    }
+fn process_inputs(inputs: &mut ActiveInputs, keyboard_state: &KeyboardState) {
+    inputs.exit_game = keyboard_state.is_scancode_pressed(Scancode::Escape);
+    inputs.move_forward = keyboard_state.is_scancode_pressed(Scancode::W);
+    inputs.move_back = keyboard_state.is_scancode_pressed(Scancode::S);
+    inputs.turn_right = keyboard_state.is_scancode_pressed(Scancode::D);
+    inputs.turn_left = keyboard_state.is_scancode_pressed(Scancode::A);
+
 }
 
 fn apply_key_up_to_inputs(inputs: &mut ActiveInputs, key: Keycode) {

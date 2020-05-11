@@ -49,7 +49,7 @@ impl GameState {
         }
     }
 
-    pub fn tick(&mut self, time_since_last_frame: &Duration, inputs: ActiveInputs) {
+    pub fn tick(&mut self, time_since_last_frame: &Duration, inputs: &ActiveInputs) {
         if inputs.zoom_in {
             self.map_zoom_level += 1;
         }
