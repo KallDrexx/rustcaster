@@ -7,6 +7,7 @@ pub struct Player {
     pub collision_size: u16,
     pub velocity: Vector,
     pub turn_speed: f32,
+    pub move_speed: f32,
 }
 
 impl Player {
@@ -17,6 +18,7 @@ impl Player {
             collision_size: 10,
             velocity: Vector {x: 0f32, y: 0f32},
             turn_speed: 5_f32,
+            move_speed: 100_f32,
         }
     }
 }

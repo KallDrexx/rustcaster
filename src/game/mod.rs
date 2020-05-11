@@ -66,6 +66,23 @@ impl GameState {
         if inputs.turn_right {
             self.player.facing = &self.player.facing + turn_amount;
         }
+
+        let mut velocity = Vector { x: 0_f32, y: 0_f32 };
+        if inputs.move_forward {
+            velocity = velocity + Vector {
+                x: self.player.facing.0.cos() * self.player.move_speed,
+                y: self.player.facing.0.sin() * self.player.move_speed,
+            };
+        }
+
+        if inputs.move_back {
+            velocity = velocity + Vector {
+                x: self.player.facing.0.cos() * self.player.move_speed * -1_f32,
+                y: self.player.facing.0.sin() * self.player.move_speed * -1_f32,
+            };
+        }
+
+        self.player.position = &self.player.position + (velocity * time_since_last_frame.as_secs_f32());
     }
 }
 
