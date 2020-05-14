@@ -2,6 +2,7 @@ use std::ops::{Add, Sub, Mul, Div};
 use std::f32::consts::PI;
 use crate::core::degrees::Degrees;
 
+#[derive(Copy, Clone)]
 pub struct Radians(pub f32);
 
 impl Radians {
@@ -9,7 +10,7 @@ impl Radians {
         Degrees(self.0 * (180_f32 / PI))
     }
 
-    fn clamp(self) -> Self {
+    pub fn clamp(self) -> Self {
         const COMPLETE_CIRCLE: f32 = 2_f32 * PI;
 
         if self.0 >= COMPLETE_CIRCLE {
@@ -37,8 +38,6 @@ impl Add<f32> for Radians {
         Radians(self.0 + other).clamp()
     }
 }
-
-
 
 impl Sub<f32> for &Radians {
     type Output = Radians;

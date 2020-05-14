@@ -25,7 +25,7 @@ pub struct Map {
 static DEFAULT_MAP: &str = "
 xxxxxxxxxx
 x        x
-x        x
+x xxxxxx x
 x        x
 xxxxx xxxx
 x @ x x  x
@@ -33,7 +33,7 @@ x   x x  x
 x   x x  x
 x xxx    x
 x        x
-x        x
+x x x x xx
 xxxxxxxxxx
 ";
 
@@ -42,14 +42,13 @@ impl Map {
         string_map_to_map(DEFAULT_MAP)
     }
 
-    pub fn cell_at(&self, row: usize, col: usize) -> &CellType {
+    pub fn cell_at(&self, row: usize, col: usize) -> Option<&CellType> {
         if row >= self.height || col >= self.width {
-            panic!("Cell ({}, {}) is not valid for map with height {} and width {}", row, col, self.height, self.width);
+            return None;
         }
 
         let index = row * self.width + col;
-
-        self.cells.get(index).unwrap()
+        self.cells.get(index)
     }
 }
 
