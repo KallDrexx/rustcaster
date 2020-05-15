@@ -6,12 +6,16 @@ use crate::game::GameState;
 use crate::core::radians::Radians;
 use crate::core::vector::Vector;
 use crate::core::degrees::Degrees;
+use crate::{SCREEN_HEIGHT, SCREEN_WIDTH};
+
+const FOV_DEGREES: Degrees = Degrees(90.0);
 
 pub fn render(canvas: &mut WindowCanvas, game_state: &GameState) {
-    canvas.set_draw_color(Color::BLACK);
-    canvas.clear();
-
-    render_overhead_map(canvas, game_state);
+    if game_state.display_map {
+        render_overhead_map(canvas, game_state);
+    } else {
+        render_game_view(canvas, game_state);
+    }
 
     canvas.present();
 }
@@ -21,6 +25,9 @@ struct RayResult {
 }
 
 fn render_overhead_map(canvas: &mut WindowCanvas, game_state: &GameState) {
+    canvas.set_draw_color(Color::BLACK);
+    canvas.clear();
+
     let zoom = game_state.map_zoom_level as f32;
 
     for row in 0..game_state.map.height as i32 {
@@ -59,7 +66,6 @@ fn render_overhead_map(canvas: &mut WindowCanvas, game_state: &GameState) {
 
         // Show rays for all pixel columns
         canvas.set_draw_color(Color::BLACK);
-        const FOV_DEGREES: Degrees = Degrees(90.0);
 
         let first_ray_at = game_state.player.facing - FOV_DEGREES.to_radians() / 2.0;
         let ray_count = canvas.window().size().0;
@@ -72,6 +78,40 @@ fn render_overhead_map(canvas: &mut WindowCanvas, game_state: &GameState) {
             let line_end_y = (angle.0.sin() * ray.distance * zoom) + pos_y;
             canvas.draw_line(Point::new(pos_x as i32, pos_y as i32), Point::new(line_end_x as i32, line_end_y as i32)).unwrap();
         }
+    }
+}
+
+fn render_game_view(canvas: &mut WindowCanvas, game_state: &GameState) {
+    canvas.set_draw_color(Color::GRAY);
+    canvas.clear();
+
+    canvas.set_draw_color(Color::WHITE);
+    canvas.fill_rect(Rect::new(0, SCREEN_HEIGHT as i32 / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2)).unwrap();
+
+    let first_ray_at = game_state.player.facing - FOV_DEGREES.to_radians() / 2.0;
+    let ray_count = canvas.window().size().0;
+    let radians_per_ray = FOV_DEGREES.to_radians() / ray_count as f32;
+
+    for x in 0..ray_count {
+        let angle = first_ray_at + (radians_per_ray * x as f32);
+        let ray = shoot_ray(game_state, angle);
+
+        let mut distance = ray.distance - game_state.player.collision_size as f32 / 2.0;
+        if distance < 1.0 {
+            distance = 1.0;
+        }
+
+        let height = SCREEN_HEIGHT as f32 / distance;
+        let start_y = SCREEN_HEIGHT as f32 / 2.0 - height / 2.0;
+
+        let mut color_value = 255 / ray.distance as u8;
+        if color_value < 50 {
+            color_value = 50;
+        }
+
+        let color = Color::RGB(color_value, 0, 0);
+        canvas.set_draw_color(color);
+        canvas.draw_line(Point::new(x as i32, start_y as i32), Point::new(x as i32, start_y as i32 + height as i32)).unwrap();
     }
 }
 

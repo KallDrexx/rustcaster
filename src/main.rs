@@ -9,8 +9,8 @@ use sdl2::keyboard::{Keycode, KeyboardState, Scancode};
 
 use crate::game::{GameState, ActiveInputs};
 
-static SCREEN_WIDTH: u32 = 800;
-static SCREEN_HEIGHT: u32 = 600;
+const SCREEN_WIDTH: u32 = 800;
+const SCREEN_HEIGHT: u32 = 600;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -25,21 +25,17 @@ pub fn main() {
     let mut game_state = GameState::new();
     let mut frame_count = 0_u32;
     let mut last_frame_at = Instant::now();
-    let mut inputs = ActiveInputs::new();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'main_loop: loop {
         let frame_start = Instant::now();
         let time_since_last_frame = frame_start - last_frame_at;
-
-        inputs.zoom_out = false;
-        inputs.zoom_in = false;
+        let mut inputs = ActiveInputs::new();
 
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} => break 'main_loop,
                 Event::KeyUp { keycode: Some(key), .. } => {
-
                     apply_key_up_to_inputs(&mut inputs, key);
                 }
                 _ => {}
@@ -74,6 +70,7 @@ fn apply_key_up_to_inputs(inputs: &mut ActiveInputs, key: Keycode) {
     match key {
         Keycode::KpPlus => inputs.zoom_in = true,
         Keycode::KpMinus => inputs.zoom_out = true,
+        Keycode::M => inputs.toggle_map = true,
         _ => (),
     }
 }

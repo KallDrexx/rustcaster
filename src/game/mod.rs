@@ -10,7 +10,7 @@ pub struct GameState {
     pub map: Map,
     pub player: Player,
     pub map_zoom_level: u16,
-    _private: (),
+    pub display_map: bool,
 }
 
 pub struct ActiveInputs {
@@ -20,7 +20,8 @@ pub struct ActiveInputs {
     pub move_forward: bool,
     pub move_back: bool,
     pub zoom_in: bool,
-    pub zoom_out: bool
+    pub zoom_out: bool,
+    pub toggle_map: bool,
 }
 
 #[derive(Debug)]
@@ -48,17 +49,30 @@ impl GameState {
             map,
             player,
             map_zoom_level: 1,
-            _private: (),
+            display_map: true,
         }
     }
 
     pub fn tick(&mut self, time_since_last_frame: &Duration, inputs: &ActiveInputs) {
+        self.apply_inputs(time_since_last_frame, inputs);
+
+        self.apply_wall_collision(Side::Right);
+        self.apply_wall_collision(Side::Bottom);
+        self.apply_wall_collision(Side::Left);
+        self.apply_wall_collision(Side::Top);
+    }
+
+    fn apply_inputs(&mut self, time_since_last_frame: &Duration, inputs: &ActiveInputs) {
         if inputs.zoom_in {
             self.map_zoom_level += 1;
         }
 
         if inputs.zoom_out && self.map_zoom_level > 1 {
             self.map_zoom_level -= 1;
+        }
+
+        if inputs.toggle_map {
+            self.display_map = !self.display_map;
         }
 
         let turn_amount = self.player.turn_speed * time_since_last_frame.as_secs_f32();
@@ -86,11 +100,6 @@ impl GameState {
         }
 
         self.player.position = self.player.position + (velocity * time_since_last_frame.as_secs_f32());
-
-        self.apply_wall_collision(Side::Right);
-        self.apply_wall_collision(Side::Bottom);
-        self.apply_wall_collision(Side::Left);
-        self.apply_wall_collision(Side::Top);
     }
 
     fn apply_wall_collision(&mut self, side: Side) {
@@ -116,10 +125,6 @@ impl GameState {
             (true, Side::Top) => {self.player.position.y = ((row + 1) * self.map.units_per_cell + self.player.collision_size as u32 / 2) as f32;},
             (true, Side::Bottom) => {self.player.position.y = (row * self.map.units_per_cell - self.player.collision_size as u32 / 2) as f32;},
         }
-
-        if should_move {
-
-        }
     }
 }
 
@@ -133,6 +138,7 @@ impl ActiveInputs {
             move_forward: false,
             zoom_in: false,
             zoom_out: false,
+            toggle_map: false,
         }
     }
 }
