@@ -60,11 +60,11 @@ impl GameState {
 
         let turn_amount = self.player.turn_speed * time_since_last_frame.as_secs_f32();
         if inputs.turn_left {
-            self.player.facing = &self.player.facing - turn_amount;
+            self.player.facing = self.player.facing - turn_amount;
         }
 
         if inputs.turn_right {
-            self.player.facing = &self.player.facing + turn_amount;
+            self.player.facing = self.player.facing + turn_amount;
         }
 
         let mut velocity = Vector { x: 0_f32, y: 0_f32 };

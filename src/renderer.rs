@@ -61,11 +61,11 @@ fn render_overhead_map(canvas: &mut WindowCanvas, game_state: &GameState) {
         canvas.set_draw_color(Color::BLACK);
         const FOV_DEGREES: Degrees = Degrees(90.0);
 
-        let first_ray_at = Radians(game_state.player.facing.0 - FOV_DEGREES.to_radians().0 / 2.0).clamp();
+        let first_ray_at = game_state.player.facing - FOV_DEGREES.to_radians() / 2.0;
         let ray_count = canvas.window().size().0;
-        let radians_per_ray = Radians(FOV_DEGREES.to_radians().0 / ray_count as f32);
+        let radians_per_ray = FOV_DEGREES.to_radians() / ray_count as f32;
         for x in 0..ray_count {
-            let angle = Radians(first_ray_at.0 + (radians_per_ray.0 * x as f32)).clamp();
+            let angle = first_ray_at + (radians_per_ray * x as f32);
             let ray = shoot_ray(game_state, angle);
 
             let line_end_x = (angle.0.cos() * ray.distance * zoom) + pos_x;

@@ -1,15 +1,10 @@
 use std::ops::{Add, Sub, Mul, Div};
 use std::f32::consts::PI;
-use crate::core::degrees::Degrees;
 
 #[derive(Copy, Clone)]
 pub struct Radians(pub f32);
 
 impl Radians {
-    pub fn to_degrees(&self) -> Degrees {
-        Degrees(self.0 * (180_f32 / PI))
-    }
-
     pub fn clamp(self) -> Self {
         const COMPLETE_CIRCLE: f32 = 2_f32 * PI;
 
@@ -23,11 +18,11 @@ impl Radians {
     }
 }
 
-impl Add<f32> for &Radians {
+impl Add for Radians {
     type Output = Radians;
 
-    fn add(self, other: f32) -> Radians {
-        Radians(self.0 + other).clamp()
+    fn add(self, other: Radians) -> Radians {
+        Radians(self.0 + other.0).clamp()
     }
 }
 
@@ -39,11 +34,11 @@ impl Add<f32> for Radians {
     }
 }
 
-impl Sub<f32> for &Radians {
+impl Sub for Radians {
     type Output = Radians;
 
-    fn sub(self, other: f32) -> Radians {
-        Radians(self.0 - other).clamp()
+    fn sub(self, other: Radians) -> Radians {
+        Radians(self.0 - other.0).clamp()
     }
 }
 
@@ -55,27 +50,11 @@ impl Sub<f32> for Radians {
     }
 }
 
-impl Mul<f32> for &Radians {
-    type Output = Radians;
-
-    fn mul(self, other: f32) -> Radians {
-        Radians(self.0 * other).clamp()
-    }
-}
-
 impl Mul<f32> for Radians {
     type Output = Radians;
 
     fn mul(self, other: f32) -> Radians {
         Radians(self.0 * other).clamp()
-    }
-}
-
-impl Div<f32> for &Radians {
-    type Output = Radians;
-
-    fn div(self, other: f32) -> Radians {
-        Radians(self.0 / other).clamp()
     }
 }
 
