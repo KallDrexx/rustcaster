@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub enum CellType { Empty, Wall }
 
 #[derive(Eq, PartialEq)]
@@ -42,13 +43,16 @@ impl Map {
         string_map_to_map(DEFAULT_MAP)
     }
 
-    pub fn cell_at(&self, row: usize, col: usize) -> Option<&CellType> {
+    pub fn cell_at(&self, row: usize, col: usize) -> Option<CellType> {
         if row >= self.height || col >= self.width {
             return None;
         }
 
         let index = row * self.width + col;
-        self.cells.get(index)
+        match self.cells.get(index) {
+            None => None,
+            Some(x) => Some(*x),
+        }
     }
 }
 

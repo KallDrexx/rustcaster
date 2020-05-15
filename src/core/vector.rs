@@ -1,22 +1,12 @@
 use std::ops::{Add, Sub, Mul};
 
+#[derive(Copy, Clone)]
 pub struct Vector {
     pub x: f32,
     pub y: f32,
 }
 
 impl Add for Vector {
-    type Output = Vector;
-
-    fn add(self, other: Vector) -> Vector {
-        Vector {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-}
-
-impl Add<Vector> for &Vector {
     type Output = Vector;
 
     fn add(self, other: Vector) -> Vector {
@@ -37,18 +27,6 @@ impl Sub for Vector {
         }
     }
 }
-
-impl Sub<Vector> for &Vector {
-    type Output = Vector;
-
-    fn sub(self, other: Vector) -> Vector {
-        Vector {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
-
 impl Mul<f32> for Vector {
     type Output = Vector;
 

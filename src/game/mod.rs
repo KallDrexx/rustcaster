@@ -1,4 +1,4 @@
-use crate::game::map::{Map, SpawnType};
+use crate::game::map::{Map, SpawnType, CellType};
 use crate::game::entities::Player;
 use std::time::Duration;
 use crate::core::vector::Vector;
@@ -22,6 +22,9 @@ pub struct ActiveInputs {
     pub zoom_in: bool,
     pub zoom_out: bool
 }
+
+#[derive(Debug)]
+enum Side { Right, Left, Top, Bottom }
 
 impl GameState {
     pub fn new() -> Self {
@@ -82,7 +85,41 @@ impl GameState {
             };
         }
 
-        self.player.position = &self.player.position + (velocity * time_since_last_frame.as_secs_f32());
+        self.player.position = self.player.position + (velocity * time_since_last_frame.as_secs_f32());
+
+        self.apply_wall_collision(Side::Right);
+        self.apply_wall_collision(Side::Bottom);
+        self.apply_wall_collision(Side::Left);
+        self.apply_wall_collision(Side::Top);
+    }
+
+    fn apply_wall_collision(&mut self, side: Side) {
+        let (test_x, test_y) = match side {
+            Side::Right => (self.player.position.x + self.player.collision_size as f32 / 2.0, self.player.position.y),
+            Side::Left => (self.player.position.x - self.player.collision_size as f32 / 2.0, self.player.position.y),
+            Side::Top => (self.player.position.x, self.player.position.y - self.player.collision_size as f32 / 2.0),
+            Side::Bottom => (self.player.position.x, self.player.position.y + self.player.collision_size as f32 / 2.0),
+        };
+
+        let row = test_y as u32 / self.map.units_per_cell;
+        let col = test_x as u32 / self.map.units_per_cell;
+
+        let should_move = match self.map.cell_at(row as usize, col as usize) {
+            Some(CellType::Empty) => false,
+            _ => true,
+        };
+
+        match (should_move, side) {
+            (false, _) => (),
+            (true, Side::Right) => {self.player.position.x = (col * self.map.units_per_cell - self.player.collision_size as u32 / 2) as f32;},
+            (true, Side::Left) => {self.player.position.x = ((col + 1) * self.map.units_per_cell + self.player.collision_size as u32 / 2) as f32;},
+            (true, Side::Top) => {self.player.position.y = ((row + 1) * self.map.units_per_cell + self.player.collision_size as u32 / 2) as f32;},
+            (true, Side::Bottom) => {self.player.position.y = (row * self.map.units_per_cell - self.player.collision_size as u32 / 2) as f32;},
+        }
+
+        if should_move {
+
+        }
     }
 }
 

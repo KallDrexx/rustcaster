@@ -120,7 +120,7 @@ fn shoot_ray(game_state: &GameState, angle: Radians) -> RayResult {
 
             match game_state.map.cell_at(row as usize, col as usize) {
                 None => (),
-                Some(&CellType::Wall) => return RayResult {distance: distance_to_y_value},
+                Some(CellType::Wall) => return RayResult {distance: distance_to_y_value},
                 Some(_) => (),
             }
 
@@ -136,7 +136,7 @@ fn shoot_ray(game_state: &GameState, angle: Radians) -> RayResult {
 
             match game_state.map.cell_at(row as usize, col as usize) {
                 None => (),
-                Some(&CellType::Wall) => return RayResult {distance: distance_to_x_value},
+                Some(CellType::Wall) => return RayResult {distance: distance_to_x_value},
                 Some(_) => (),
             }
 
