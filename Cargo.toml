@@ -7,3 +7,4 @@ build = "build.rs"
 
 [dependencies]
 sdl2 = { version = "0.34.0" }
+png = "0.16.3"

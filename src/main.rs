@@ -1,12 +1,10 @@
-extern crate sdl2;
 mod core;
 mod game;
-mod renderer;
+mod rendering;
 
 use std::time::{Instant};
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, KeyboardState, Scancode};
-
 use crate::game::{GameState, ActiveInputs};
 
 const SCREEN_WIDTH: u32 = 800;
@@ -50,7 +48,7 @@ pub fn main() {
 
         game_state.tick(&time_since_last_frame, &inputs);
 
-        renderer::render(&mut canvas, &game_state);
+        rendering::render(&mut canvas, &game_state);
 
         frame_count = frame_count.wrapping_add(1_u32);
         last_frame_at = frame_start;
