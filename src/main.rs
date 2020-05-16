@@ -71,6 +71,7 @@ fn apply_key_up_to_inputs(inputs: &mut ActiveInputs, key: Keycode) {
         Keycode::KpPlus => inputs.zoom_in = true,
         Keycode::KpMinus => inputs.zoom_out = true,
         Keycode::M => inputs.toggle_map = true,
+        Keycode::Slash => inputs.toggle_test = true,
         _ => (),
     }
 }

@@ -99,7 +99,7 @@ fn string_map_to_map(map: &str) -> Map {
 
     Map {
         width, height, spawns, cells,
-        units_per_cell: 20,
+        units_per_cell: 5,
     }
 }
 

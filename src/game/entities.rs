@@ -15,10 +15,10 @@ impl Player {
         Player {
             position: initial_pos,
             facing: Radians(0_f32),
-            collision_size: 10,
+            collision_size: 2,
             velocity: Vector {x: 0f32, y: 0f32},
             turn_speed: 5_f32,
-            move_speed: 20_f32,
+            move_speed: 10_f32,
         }
     }
 }

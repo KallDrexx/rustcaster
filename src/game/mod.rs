@@ -11,6 +11,7 @@ pub struct GameState {
     pub player: Player,
     pub map_zoom_level: u16,
     pub display_map: bool,
+    pub test_mode: bool,
 }
 
 pub struct ActiveInputs {
@@ -22,6 +23,7 @@ pub struct ActiveInputs {
     pub zoom_in: bool,
     pub zoom_out: bool,
     pub toggle_map: bool,
+    pub toggle_test: bool,
 }
 
 #[derive(Debug)]
@@ -50,6 +52,7 @@ impl GameState {
             player,
             map_zoom_level: 1,
             display_map: true,
+            test_mode: false,
         }
     }
 
@@ -63,6 +66,10 @@ impl GameState {
     }
 
     fn apply_inputs(&mut self, time_since_last_frame: &Duration, inputs: &ActiveInputs) {
+        if inputs.toggle_test {
+            self.test_mode = !self.test_mode;
+        }
+
         if inputs.zoom_in {
             self.map_zoom_level += 1;
         }
@@ -139,6 +146,7 @@ impl ActiveInputs {
             zoom_in: false,
             zoom_out: false,
             toggle_map: false,
+            toggle_test: false,
         }
     }
 }
