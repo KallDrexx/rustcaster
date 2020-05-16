@@ -33,8 +33,6 @@ pub fn render_game_view(canvas: &mut WindowCanvas, game_state: &GameState) {
             adjusted_distance = 1.0;
         }
 
-        let height = SCREEN_HEIGHT as f32 / (adjusted_distance / 1.5);
-        let start_y = SCREEN_HEIGHT as f32 / 2.0 - height / 2.0;
 
         const COLOR_GRADIENT_VALUE: f32 = 5.0;
         const MIN_COLOR: u8 = 50;
@@ -42,7 +40,17 @@ pub fn render_game_view(canvas: &mut WindowCanvas, game_state: &GameState) {
         let color_denominator = if distance < COLOR_GRADIENT_VALUE { 1.0 } else { distance / COLOR_GRADIENT_VALUE };
         let color_value = (255.0 / color_denominator) as u8;
         let color = Color::RGB(max(color_value, MIN_COLOR), 0, 0);
+
         canvas.set_draw_color(color);
-        canvas.draw_line(Point::new(x as i32, start_y as i32), Point::new(x as i32, start_y as i32 + height as i32)).unwrap();
+
+        let mut height = SCREEN_HEIGHT as f32 / (adjusted_distance / 1.5);
+        if height > SCREEN_HEIGHT as f32 {
+            height = SCREEN_HEIGHT as f32;
+        }
+
+        let start_y = SCREEN_HEIGHT as f32 / 2.0 - height / 2.0;
+        for y in (start_y as u32)..(start_y as u32 + height as u32) {
+            canvas.draw_point(Point::new(x as i32, y as i32)).unwrap();
+        }
     }
 }
