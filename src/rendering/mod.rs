@@ -1,3 +1,4 @@
+pub mod atlas;
 mod map;
 mod game_view;
 
@@ -8,14 +9,15 @@ use crate::core::radians::Radians;
 use crate::game::map::CellType;
 use crate::core::vector::Vector;
 use crate::core::degrees::Degrees;
+use crate::rendering::atlas::Atlas;
 use map::render_overhead_map;
 use game_view::render_game_view;
 
-pub fn render(canvas: &mut WindowCanvas, game_state: &GameState) {
+pub fn render(canvas: &mut WindowCanvas, game_state: &GameState, wall_atlas: &Atlas) {
     canvas.set_draw_color(Color::BLACK);
     canvas.clear();
 
-    render_game_view(canvas, game_state);
+    render_game_view(canvas, game_state, wall_atlas);
     if game_state.display_map {
         render_overhead_map(canvas, game_state);
     }
@@ -27,12 +29,14 @@ const FOV_DEGREES: Degrees = Degrees(90.0);
 
 struct RayResult {
     distance: f32,
+    units_from_cell_start: f32,
+    cell_type: CellType,
 }
 
 fn shoot_ray(game_state: &GameState, angle: Radians) -> RayResult {
     // If the player is off the map in the negative region, don't shoot the array
     if game_state.player.position.x < 0.0 || game_state.player.position.y < 0.0 {
-        return RayResult {distance: 0.0};
+        return RayResult {distance: 0.0, units_from_cell_start: 0.0, cell_type: CellType::Empty};
     }
 
     let rise = angle.0.sin();
@@ -55,7 +59,7 @@ fn shoot_ray(game_state: &GameState, angle: Radians) -> RayResult {
         let vertically_out_of_map = y_value < 0.0 || y_value > game_state.map.height as f32 * game_state.map.units_per_cell as f32;
 
         if horizontally_out_of_map && vertically_out_of_map {
-            return RayResult { distance: 0.0 };
+            return RayResult { distance: 0.0, units_from_cell_start: 0.0, cell_type: CellType::Empty };
         }
 
         let x_at_y_value_intercept = (y_value - y_offset) / slope;
@@ -72,10 +76,9 @@ fn shoot_ray(game_state: &GameState, angle: Radians) -> RayResult {
             let row = adjusted_value as u32 / game_state.map.units_per_cell;
             let col = x_at_y_value_intercept as u32 / game_state.map.units_per_cell;
 
-            match game_state.map.cell_at(row as usize, col as usize) {
-                None => (),
-                Some(CellType::Wall) => return RayResult {distance: distance_to_y_value},
-                Some(_) => (),
+            match get_ray_result(game_state, row as usize, col as usize, distance_to_y_value, x_at_y_value_intercept) {
+                Some(x) => return x,
+                _ => (),
             }
 
             // hit empty space
@@ -88,10 +91,9 @@ fn shoot_ray(game_state: &GameState, angle: Radians) -> RayResult {
             let row = y_at_x_value_intercept as u32 / game_state.map.units_per_cell;
             let col = adjusted_value as u32 / game_state.map.units_per_cell;
 
-            match game_state.map.cell_at(row as usize, col as usize) {
-                None => (),
-                Some(CellType::Wall) => return RayResult {distance: distance_to_x_value},
-                Some(_) => (),
+            match get_ray_result(game_state, row as usize, col as usize, distance_to_x_value, y_at_x_value_intercept) {
+                Some(x) => return x,
+                _ => (),
             }
 
             // hit empty space
@@ -105,4 +107,16 @@ fn calc_distance(first: &Vector, second_x: f32, second_y: f32) -> f32 {
     let b = (first.x - second_x).abs();
 
     (a * a + b * b).sqrt()
+}
+
+fn get_ray_result(game_state: &GameState, row: usize, col: usize, distance: f32, position: f32) -> Option<RayResult> {
+    match game_state.map.cell_at(row, col) {
+        None => None,
+        Some(CellType::Empty) => None,
+        Some(cell_type) => Some(RayResult {
+            distance,
+            units_from_cell_start: position % game_state.map.units_per_cell as f32,
+            cell_type,
+        }),
+    }
 }

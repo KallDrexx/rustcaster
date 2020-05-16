@@ -1,5 +1,5 @@
-#[derive(Copy, Clone)]
-pub enum CellType { Empty, Wall }
+#[derive(Copy, Clone, Debug)]
+pub enum CellType { Empty, BrickWall, BlueWall, WoodWall }
 
 #[derive(Eq, PartialEq)]
 pub enum SpawnType {Player}
@@ -28,14 +28,14 @@ xxxxxxxxxx
 x        x
 x xxxxxx x
 x        x
-xxxxx xxxx
-x @ x x  x
-x   x x  x
-x   x x  x
-x xxx    x
-x        x
-x x x x xx
-xxxxxxxxxx
+xxxxx bbbb
+x @ x b  b
+x   x b  b
+x   x b  b
+x xxx    b
+x        b
+w w w w ww
+wwwwwwwwww
 ";
 
 impl Map {
@@ -106,7 +106,9 @@ fn string_map_to_map(map: &str) -> Map {
 fn char_to_cell_type(character: char) -> ParsedCell {
     match character {
         ' ' => ParsedCell::Environmental(CellType::Empty),
-        'x' => ParsedCell::Environmental(CellType::Wall),
+        'x' => ParsedCell::Environmental(CellType::BrickWall),
+        'b' => ParsedCell::Environmental(CellType::BlueWall),
+        'w' => ParsedCell::Environmental(CellType::WoodWall),
         '@' => ParsedCell::Spawn(SpawnType::Player),
         _ => panic!("No known type of cell type for '{}'", character),
     }

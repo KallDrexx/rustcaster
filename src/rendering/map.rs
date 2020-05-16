@@ -20,7 +20,9 @@ pub fn render_overhead_map(canvas: &mut WindowCanvas, game_state: &GameState) {
 
             match cell {
                 None => unreachable!(),
-                Some(CellType::Wall) => canvas.set_draw_color(Color::RED),
+                Some(CellType::BrickWall) => canvas.set_draw_color(Color::RED),
+                Some(CellType::BlueWall) => canvas.set_draw_color(Color::BLUE),
+                Some(CellType::WoodWall) => canvas.set_draw_color(Color::YELLOW),
                 Some(CellType::Empty) => canvas.set_draw_color(Color::WHITE)
             }
 

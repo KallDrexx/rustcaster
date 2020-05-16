@@ -6,9 +6,13 @@ use std::time::{Instant};
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, KeyboardState, Scancode};
 use crate::game::{GameState, ActiveInputs};
+use crate::rendering::atlas::Atlas;
 
 const SCREEN_WIDTH: u32 = 800;
 const SCREEN_HEIGHT: u32 = 600;
+const BRICK_WALL_SECTION: &str = "BRICK";
+const WOOD_WALL_SECTION: &str = "WOOD";
+const BLUE_WALL_SECTION: &str = "BLUE";
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -18,6 +22,15 @@ pub fn main() {
         .position_centered()
         .build()
         .unwrap();
+
+    let mut wall_atlas = match Atlas::new("assets/wolftextures.png".to_owned()) {
+        Ok(x) => x,
+        Err(err) => panic!("Error loading atlas texture: {:?}", err),
+    };
+
+    wall_atlas.create_section(BRICK_WALL_SECTION.to_owned(), 64, 0, 64, 64);
+    wall_atlas.create_section(BLUE_WALL_SECTION.to_owned(), 256, 0, 64, 64);
+    wall_atlas.create_section(WOOD_WALL_SECTION.to_owned(), 384, 0, 64, 64);
 
     let mut canvas = window.into_canvas().build().unwrap();
     let mut game_state = GameState::new();
@@ -48,7 +61,7 @@ pub fn main() {
 
         game_state.tick(&time_since_last_frame, &inputs);
 
-        rendering::render(&mut canvas, &game_state);
+        rendering::render(&mut canvas, &game_state, &wall_atlas);
 
         frame_count = frame_count.wrapping_add(1_u32);
         last_frame_at = frame_start;
